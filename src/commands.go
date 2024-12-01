@@ -30,7 +30,7 @@ func commandExit() error {
 }
 
 func commandMap() error {
-	areas, err := getAreas("https://pokeapi.co/api/v2/location-area/?limit=20")
+	areas, err := getAreas("https://pokeapi.co/api/v2/location-area/", 20, 0)
 	if err != nil {
 		return err
 	}

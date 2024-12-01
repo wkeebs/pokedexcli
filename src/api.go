@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 )
 
 type LocationArea struct {
@@ -19,12 +20,22 @@ type LocationResponse struct {
 	Results  []LocationArea `json:"results"`
 }
 
-func getAreas(url string) ([]LocationArea, error) {
+func getAreas(url string, limit int, index int) ([]LocationArea, error) {
+	// create request
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
+	// add query params
+	q := req.URL.Query()
+	q.Add("limit", strconv.Itoa(limit))
+	q.Add("offset", strconv.Itoa(index*limit))
+	req.URL.RawQuery = q.Encode()
+
+	// fmt.Println("requesting: " + req.URL.String())
+
+	// make request
 	client := http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
@@ -32,11 +43,13 @@ func getAreas(url string) ([]LocationArea, error) {
 	}
 	defer res.Body.Close()
 
+	// get body
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
 
+	// parse response into struct
 	var response LocationResponse
 	err = json.Unmarshal(body, &response)
 	if err != nil {
