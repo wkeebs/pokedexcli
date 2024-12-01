@@ -5,6 +5,8 @@ import (
 	"os"
 )
 
+const AREA_LIMIT = 20
+
 type command struct {
 	name        string
 	description string
@@ -29,16 +31,23 @@ func commandExit() error {
 	return nil
 }
 
-func commandMap() error {
-	areas, err := getAreas("https://pokeapi.co/api/v2/location-area/", 20, 0)
-	if err != nil {
-		return err
-	}
+func commandMap(increment int) func() error {
+	areaIndex := 0 // essentially, current page in the API
+	return func() error {
+		areas, err := getAreas("https://pokeapi.co/api/v2/location-area/", AREA_LIMIT, areaIndex)
+		if err != nil {
+			return err
+		}
 
-	for _, a := range areas {
-		fmt.Println(a.Name)
+		// increment or decrement current index after each call
+		// -> changes whether map or mapb is called
+		areaIndex += increment
+
+		for _, a := range areas {
+			fmt.Println(a.Name)
+		}
+		return nil
 	}
-	return nil
 }
 
 func commandMapB() error {
@@ -60,12 +69,12 @@ func Commands() map[string]command {
 		"map": {
 			name:        "map",
 			description: "Displays next 20 locations",
-			callback:    commandMap,
+			callback:    commandMap(1),
 		},
 		"mapb": {
 			name:        "mapb",
 			description: "Displays previous 20 locations",
-			callback:    commandMapB,
+			callback:    commandMap(-1),
 		},
 	}
 }
