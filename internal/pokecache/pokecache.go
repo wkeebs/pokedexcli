@@ -1,6 +1,8 @@
 package pokecache
 
 import (
+	"fmt"
+	"reflect"
 	"sync"
 	"time"
 )
@@ -24,6 +26,12 @@ func NewCache(interval time.Duration) Cache {
 	go c.reapLoop(interval)
 
 	return c
+}
+
+func (c Cache) PrintCache() {
+	for key, val := range c.cache {
+		fmt.Printf("%s: %s (%s)\n", key, reflect.TypeOf(val.val), val.createdAt)
+	}
 }
 
 func (c Cache) Add(key string, val []byte) {

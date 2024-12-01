@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"strconv"
-
 )
 
 type LocationArea struct {
@@ -39,13 +38,13 @@ func (c *Client) ListLocations(limit int, index int) (LocationResponse, error) {
 	requestURL := req.URL.String()
 
 	// check the cache for this url
-	if val, ok := c.cache.Get(url); ok {
+	if val, ok := c.Cache.Get(requestURL); ok {
 		locationsResp := LocationResponse{}
 		err := json.Unmarshal(val, &locationsResp)
 		if err != nil {
 			return LocationResponse{}, err
 		}
-
+		fmt.Println("[PAGE FOUND IN CACHE]")
 		return locationsResp, nil
 	}
 
@@ -70,6 +69,6 @@ func (c *Client) ListLocations(limit int, index int) (LocationResponse, error) {
 		return LocationResponse{}, err
 	}
 
-	c.cache.Add(requestURL, body) // cache response for this url
+	c.Cache.Add(requestURL, body) // cache response for this url
 	return response, nil
 }

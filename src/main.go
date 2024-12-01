@@ -41,6 +41,8 @@ func main() {
 			continue
 		}
 
+		// cfg.pokeapiClient.Cache.PrintCache()
+
 		// execute
 		err = cmd.callback(cfg)
 		if err != nil {
