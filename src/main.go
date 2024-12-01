@@ -29,6 +29,10 @@ func main() {
 		}
 
 		// execute
-		cmd.callback()
+		err = cmd.callback()
+		if err != nil {
+			fmt.Printf("ERROR calling '%s': %s\n", cmd.name, err)
+		}
 	}
+
 }

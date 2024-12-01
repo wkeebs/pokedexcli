@@ -29,6 +29,22 @@ func commandExit() error {
 	return nil
 }
 
+func commandMap() error {
+	areas, err := getAreas("https://pokeapi.co/api/v2/location-area/?limit=20")
+	if err != nil {
+		return err
+	}
+
+	for _, a := range areas {
+		fmt.Println(a.Name)
+	}
+	return nil
+}
+
+func commandMapB() error {
+	return nil
+}
+
 func Commands() map[string]command {
 	return map[string]command{
 		"help": {
@@ -40,6 +56,16 @@ func Commands() map[string]command {
 			name:        "quit",
 			description: "Exit the Pokedex",
 			callback:    commandExit,
+		},
+		"map": {
+			name:        "map",
+			description: "Displays next 20 locations",
+			callback:    commandMap,
+		},
+		"mapb": {
+			name:        "mapb",
+			description: "Displays previous 20 locations",
+			callback:    commandMapB,
 		},
 	}
 }
