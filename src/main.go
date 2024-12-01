@@ -5,11 +5,24 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
+
+	"github.com/wkeebs/pokedexcli/internal/pokeapi"
 )
 
+type config struct {
+	pokeapiClient     pokeapi.Client
+	locationPageIndex int
+}
+
 func main() {
+	client := pokeapi.NewClient(5*time.Second, 5*time.Minute)
+	cfg := &config{
+		pokeapiClient:     client,
+		locationPageIndex: -1,
+	}
 	reader := bufio.NewReader(os.Stdin)
-	commands := Commands()
+	commands := Commands(cfg)
 
 	for {
 		fmt.Printf("Pokedex > ")
@@ -29,9 +42,9 @@ func main() {
 		}
 
 		// execute
-		err = cmd.callback()
+		err = cmd.callback(cfg)
 		if err != nil {
-			fmt.Printf("ERROR calling '%s': %s\n", cmd.name, err)
+			fmt.Println(err)
 		}
 	}
 

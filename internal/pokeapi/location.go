@@ -1,4 +1,4 @@
-package main
+package pokeapi
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+
 )
 
 type LocationArea struct {
@@ -20,11 +21,13 @@ type LocationResponse struct {
 	Results  []LocationArea `json:"results"`
 }
 
-func getAreas(url string, limit int, index int) ([]LocationArea, error) {
+func (c *Client) ListLocations(limit int, index int) (LocationResponse, error) {
+	url := baseURL + "/location-area/"
+
 	// create request
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("error creating request: %w", err)
+		return LocationResponse{}, fmt.Errorf("error creating request: %w", err)
 	}
 
 	// add query params
@@ -33,28 +36,40 @@ func getAreas(url string, limit int, index int) ([]LocationArea, error) {
 	q.Add("offset", strconv.Itoa(index*limit))
 	req.URL.RawQuery = q.Encode()
 
-	// fmt.Println("requesting: " + req.URL.String())
+	requestURL := req.URL.String()
+
+	// check the cache for this url
+	if val, ok := c.cache.Get(url); ok {
+		locationsResp := LocationResponse{}
+		err := json.Unmarshal(val, &locationsResp)
+		if err != nil {
+			return LocationResponse{}, err
+		}
+
+		return locationsResp, nil
+	}
 
 	// make request
 	client := http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("error sending request: %w", err)
+		return LocationResponse{}, fmt.Errorf("error sending request: %w", err)
 	}
 	defer res.Body.Close()
 
 	// get body
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, fmt.Errorf("error reading response body: %w", err)
+		return LocationResponse{}, fmt.Errorf("error reading response body: %w", err)
 	}
 
 	// parse response into struct
 	var response LocationResponse
 	err = json.Unmarshal(body, &response)
 	if err != nil {
-		return nil, err
+		return LocationResponse{}, err
 	}
 
-	return response.Results, nil
+	c.cache.Add(requestURL, body) // cache response for this url
+	return response, nil
 }
