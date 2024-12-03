@@ -129,6 +129,7 @@ func commandCatch(cfg *config, args ...string) error {
 	}
 
 	fmt.Printf("%s was caught!\n", pokemon.Name)
+	fmt.Println("You may now inspect it with the inspect command.")
 
 	cfg.pokedex[pokemon.Name] = pokemon
 	return nil
@@ -146,8 +147,16 @@ func commandInspect(cfg *config, args ...string) error {
 		return fmt.Errorf("Pokemon '%s' has not been caught!", pokemonName)
 	}
 
-	fmt.Println(pokemon.String())
+	fmt.Print(pokemon.String())
 
+	return nil
+}
+
+func commandPokedex(cfg *config, args ...string) error {
+	fmt.Println("Your Pokedex:")
+	for _, pokemon := range cfg.pokedex {
+		fmt.Printf(" - %s\n", pokemon.Name)
+	}
 	return nil
 }
 
@@ -187,6 +196,11 @@ func Commands(cfg *config) map[string]command {
 			name:        "inspect",
 			description: "Inspect a Pokemon's stats.",
 			callback:    commandInspect,
+		},
+		"pokedex": {
+			name:        "pokedex",
+			description: "List all Pokemon you have caught.",
+			callback:    commandPokedex,
 		},
 	}
 }
