@@ -221,7 +221,7 @@ func Commands(cfg *config) map[string]command {
 		"pokedex": {
 			id:          7,
 			name:        "pokedex <pokemon-name>",
-			description: "Lists all of the Pokemon you have caught.",
+			description: "List all of the Pokemon you have caught.",
 			callback:    commandPokedex,
 		},
 	}

@@ -1,6 +1,6 @@
 # Pokedex CLI
 
-This is a simple cli application I wrote in Go to interact with the Pokemon API!
+This is a simple cli application I wrote in Go to interact with the [PokéAPI](https://pokeapi.co/docs/v2#pokemon)!
 
 The available commands are:
 
