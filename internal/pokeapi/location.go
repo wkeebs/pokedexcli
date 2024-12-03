@@ -20,7 +20,7 @@ type LocationResponse struct {
 	Results  []LocationArea `json:"results"`
 }
 
-type SingleLocationResponse struct {
+type Location struct {
 	EncounterMethodRates []struct {
 		EncounterMethod struct {
 			Name string `json:"name"`
@@ -126,23 +126,23 @@ func (c *Client) ListLocations(limit int, index int) (LocationResponse, error) {
 	return response, nil
 }
 
-func (c *Client) ListSingleLocation(name string) (SingleLocationResponse, error) {
+func (c *Client) GetLocation(name string) (Location, error) {
 	url := baseURL + "/location-area/" + name
 
 	// create request
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return SingleLocationResponse{}, fmt.Errorf("error creating request: %w", err)
+		return Location{}, fmt.Errorf("error creating request: %w", err)
 	}
 
 	requestURL := req.URL.String()
 
 	// check the cache for this url
 	if val, ok := c.Cache.Get(requestURL); ok {
-		locationsResp := SingleLocationResponse{}
+		locationsResp := Location{}
 		err := json.Unmarshal(val, &locationsResp)
 		if err != nil {
-			return SingleLocationResponse{}, err
+			return Location{}, err
 		}
 		fmt.Println("[PAGE FOUND IN CACHE]")
 		return locationsResp, nil
@@ -152,21 +152,21 @@ func (c *Client) ListSingleLocation(name string) (SingleLocationResponse, error)
 	client := http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		return SingleLocationResponse{}, fmt.Errorf("error sending request: %w", err)
+		return Location{}, fmt.Errorf("error sending request: %w", err)
 	}
 	defer res.Body.Close()
 
 	// get body
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return SingleLocationResponse{}, fmt.Errorf("error reading response body: %w", err)
+		return Location{}, fmt.Errorf("error reading response body: %w", err)
 	}
 
 	// parse response into struct
-	var response SingleLocationResponse
+	var response Location
 	err = json.Unmarshal(body, &response)
 	if err != nil {
-		return SingleLocationResponse{}, err
+		return Location{}, err
 	}
 
 	c.Cache.Add(requestURL, body) // cache response for this url

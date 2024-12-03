@@ -78,7 +78,7 @@ func commandExplore(cfg *config, args ...string) error {
 
 	fmt.Printf("Exploring %s...\n", locationName)
 
-	locationResp, err := cfg.pokeapiClient.ListSingleLocation(locationName)
+	locationResp, err := cfg.pokeapiClient.GetLocation(locationName)
 	if err != nil {
 		return err
 	}
