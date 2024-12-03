@@ -12,16 +12,30 @@ import (
 const AREA_LIMIT = 20
 
 type command struct {
+	id          int
 	name        string
 	description string
 	callback    func(cfg *config, args ...string) error
 }
 
 func commandHelp(cfg *config, _ ...string) error {
-	helpMessage := "Welcome to the Pokedex!\n\n"
+	fmt.Println("Welcome to the Pokedex!")
 
-	for _, command := range Commands(cfg) {
-		helpMessage += fmt.Sprintf("%s: %s\n", command.name, command.description)
+	commands := Commands(cfg)
+	sortedCommands := GetSortedCommands(commands) // sort for deterministic order
+
+	// max length key for tabulation
+	maxCmdNameLength := 0
+	for _, cmd := range commands {
+		if len(cmd.name) > maxCmdNameLength {
+			maxCmdNameLength = len(cmd.name)
+		}
+	}
+
+	fmt.Println("\nAvailable Commands:")
+	var helpMessage string
+	for _, command := range sortedCommands {
+		helpMessage += fmt.Sprintf("  %-*s: %s\n", maxCmdNameLength, command.name, command.description)
 	}
 
 	fmt.Println(helpMessage)
@@ -163,43 +177,51 @@ func commandPokedex(cfg *config, args ...string) error {
 func Commands(cfg *config) map[string]command {
 	return map[string]command{
 		"help": {
+			id:          0,
 			name:        "help",
 			description: "Displays a help message",
 			callback:    commandHelp,
 		},
 		"quit": {
+			id:          1,
 			name:        "quit",
 			description: "Exit the Pokedex",
 			callback:    commandExit,
 		},
 		"map": {
+			id:          2,
 			name:        "map",
 			description: "Displays next 20 locations",
 			callback:    commandMapf,
 		},
 		"mapb": {
+			id:          3,
 			name:        "mapb",
 			description: "Displays previous 20 locations",
 			callback:    commandMapb,
 		},
 		"explore": {
+			id:          4,
 			name:        "explore",
 			description: "Lists all Pokemon in a given area.",
 			callback:    commandExplore,
 		},
 		"catch": {
-			name:        "catch",
+			id:          5,
+			name:        "catch <pokemon-name>",
 			description: "Attempts to catch a Pokemon.",
 			callback:    commandCatch,
 		},
 		"inspect": {
-			name:        "inspect",
+			id:          6,
+			name:        "inspect <pokemon-name>",
 			description: "Inspect a Pokemon's stats.",
 			callback:    commandInspect,
 		},
 		"pokedex": {
-			name:        "pokedex",
-			description: "List all Pokemon you have caught.",
+			id:          7,
+			name:        "pokedex <pokemon-name>",
+			description: "List all of the Pokemon you have caught.",
 			callback:    commandPokedex,
 		},
 	}
