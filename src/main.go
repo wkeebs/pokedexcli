@@ -13,7 +13,7 @@ import (
 type config struct {
 	pokeapiClient     pokeapi.Client
 	locationPageIndex int
-	exploreAreaName   string
+	pokedex           map[string]pokeapi.Pokemon
 }
 
 func main() {
@@ -21,6 +21,7 @@ func main() {
 	cfg := &config{
 		pokeapiClient:     client,
 		locationPageIndex: -1,
+		pokedex:           make(map[string]pokeapi.Pokemon),
 	}
 	reader := bufio.NewReader(os.Stdin)
 	commands := Commands(cfg)

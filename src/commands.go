@@ -3,6 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"math/rand"
+
+	"github.com/wkeebs/pokedexcli/internal/pokeapi"
 )
 
 const AREA_LIMIT = 20
@@ -96,6 +100,37 @@ func commandExplore(cfg *config, args ...string) error {
 	return nil
 }
 
+func commandCatch(cfg *config, args ...string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("Please provide a Pokemon to catch! i.e., 'catch bulbasaur'")
+	}
+
+	pokemonName := args[0]
+
+	pokemonResponse, err := cfg.pokeapiClient.GetPokemonSpecies(pokemonName)
+	if err != nil {
+		return err
+	}
+
+	pokemon := pokeapi.Pokemon{
+		Name:           pokemonResponse.Name,
+		BaseExperience: pokemonResponse.BaseExperience,
+	}
+
+	res := rand.Intn(pokemon.BaseExperience)
+
+	fmt.Printf("Throwing a Pokeball at %s...\n", pokemon.Name)
+	if res > 40 {
+		fmt.Printf("%s escaped!\n", pokemon.Name)
+		return nil
+	}
+
+	fmt.Printf("%s was caught!\n", pokemon.Name)
+
+	cfg.pokedex[pokemon.Name] = pokemon
+	return nil
+}
+
 func Commands(cfg *config) map[string]command {
 	return map[string]command{
 		"help": {
@@ -122,6 +157,11 @@ func Commands(cfg *config) map[string]command {
 			name:        "explore",
 			description: "Lists all Pokemon in a given area.",
 			callback:    commandExplore,
+		},
+		"catch": {
+			name:        "catch",
+			description: "Attempts to catch a Pokemon.",
+			callback:    commandCatch,
 		},
 	}
 }

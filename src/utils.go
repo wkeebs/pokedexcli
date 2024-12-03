@@ -9,3 +9,4 @@ func FilterEmpty(s []string) []string {
 	}
 	return newSlice
 }
+
