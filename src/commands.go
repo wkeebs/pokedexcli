@@ -113,11 +113,14 @@ func commandCatch(cfg *config, args ...string) error {
 	}
 
 	pokemon := pokeapi.Pokemon{
-		Name:           pokemonResponse.Name,
-		BaseExperience: pokemonResponse.BaseExperience,
+		Name:   pokemonResponse.Name,
+		Height: pokemonResponse.Height,
+		Weight: pokemonResponse.Weight,
+		Stats:  pokemonResponse.Stats,
+		Types:  pokemonResponse.Types,
 	}
 
-	res := rand.Intn(pokemon.BaseExperience)
+	res := rand.Intn(pokemonResponse.BaseExperience)
 
 	fmt.Printf("Throwing a Pokeball at %s...\n", pokemon.Name)
 	if res > 40 {
@@ -128,6 +131,23 @@ func commandCatch(cfg *config, args ...string) error {
 	fmt.Printf("%s was caught!\n", pokemon.Name)
 
 	cfg.pokedex[pokemon.Name] = pokemon
+	return nil
+}
+
+func commandInspect(cfg *config, args ...string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("Please provide a Pokemon to inspect! i.e., 'inspect bulbasaur'")
+	}
+
+	pokemonName := args[0]
+
+	pokemon, ok := cfg.pokedex[pokemonName]
+	if !ok {
+		return fmt.Errorf("Pokemon '%s' has not been caught!", pokemonName)
+	}
+
+	fmt.Println(pokemon.String())
+
 	return nil
 }
 
@@ -162,6 +182,11 @@ func Commands(cfg *config) map[string]command {
 			name:        "catch",
 			description: "Attempts to catch a Pokemon.",
 			callback:    commandCatch,
+		},
+		"inspect": {
+			name:        "inspect",
+			description: "Inspect a Pokemon's stats.",
+			callback:    commandInspect,
 		},
 	}
 }
