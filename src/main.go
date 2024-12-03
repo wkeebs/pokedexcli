@@ -13,6 +13,7 @@ import (
 type config struct {
 	pokeapiClient     pokeapi.Client
 	locationPageIndex int
+	exploreAreaName   string
 }
 
 func main() {
@@ -28,14 +29,17 @@ func main() {
 		fmt.Printf("Pokedex > ")
 
 		// get input
-		key, err := reader.ReadString('\n')
+		userInput, err := reader.ReadString('\n')
 		if err != nil {
 			panic(err)
 		}
-		key = strings.TrimSpace(key) // trim newline and spaces
+		userInput = strings.TrimSpace(userInput) // trim newline and spaces
+		userInputSplit := FilterEmpty(strings.Split(userInput, " "))
+
+		args := userInputSplit[1:]
 
 		// get the command
-		cmd, ok := commands[key]
+		cmd, ok := commands[userInputSplit[0]]
 		if !ok {
 			fmt.Println("Command does not exist! Try 'help'")
 			continue
@@ -44,7 +48,7 @@ func main() {
 		// cfg.pokeapiClient.Cache.PrintCache()
 
 		// execute
-		err = cmd.callback(cfg)
+		err = cmd.callback(cfg, args...)
 		if err != nil {
 			fmt.Println(err)
 		}

@@ -10,10 +10,10 @@ const AREA_LIMIT = 20
 type command struct {
 	name        string
 	description string
-	callback    func(cfg *config) error
+	callback    func(cfg *config, args ...string) error
 }
 
-func commandHelp(cfg *config) error {
+func commandHelp(cfg *config, _ ...string) error {
 	helpMessage := "Welcome to the Pokedex!\n\n"
 
 	for _, command := range Commands(cfg) {
@@ -25,7 +25,7 @@ func commandHelp(cfg *config) error {
 	return nil
 }
 
-func commandExit(cfg *config) error {
+func commandExit(cfg *config, _ ...string) error {
 	fmt.Println("Powering down...")
 	os.Exit(0)
 	return nil
@@ -61,12 +61,39 @@ func commandMap(cfg *config, forward bool) error {
 	return nil
 }
 
-func commandMapf(cfg *config) error {
+func commandMapf(cfg *config, _ ...string) error {
 	return commandMap(cfg, true)
 }
 
-func commandMapb(cfg *config) error {
+func commandMapb(cfg *config, _ ...string) error {
 	return commandMap(cfg, false)
+}
+
+func commandExplore(cfg *config, args ...string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("Please provide a location to explore! i.e., 'explore pastoria-city-area'")
+	}
+
+	locationName := args[0]
+
+	fmt.Printf("Exploring %s...\n", locationName)
+
+	locationResp, err := cfg.pokeapiClient.ListSingleLocation(locationName)
+	if err != nil {
+		return err
+	}
+
+	if len(locationResp.PokemonEncounters) == 0 {
+		fmt.Println("No Pokemon found!")
+	} else {
+		fmt.Println("Found Pokemon:")
+		for _, p := range locationResp.PokemonEncounters {
+			pokemon := p.Pokemon
+			fmt.Printf(" - %s\n", pokemon.Name)
+		}
+	}
+
+	return nil
 }
 
 func Commands(cfg *config) map[string]command {
@@ -90,6 +117,11 @@ func Commands(cfg *config) map[string]command {
 			name:        "mapb",
 			description: "Displays previous 20 locations",
 			callback:    commandMapb,
+		},
+		"explore": {
+			name:        "explore",
+			description: "Lists all Pokemon in a given area.",
+			callback:    commandExplore,
 		},
 	}
 }
